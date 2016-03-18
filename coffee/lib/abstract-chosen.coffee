@@ -34,6 +34,7 @@ class AbstractChosen
     @include_group_label_in_selected = @options.include_group_label_in_selected || false
     @max_shown_results = @options.max_shown_results || Number.POSITIVE_INFINITY
     @display_truncated_options = @options.display_truncated_options || false
+    @max_display_length = @options.max_display_length || 50
 
   set_default_text: ->
     if @form_field.getAttribute("data-placeholder")
@@ -176,7 +177,7 @@ class AbstractChosen
           if option.search_match
             if searchText.length
               optionTextLength = option.search_text.length
-              optionDisplayMaxLength = option.max_display_length || 50
+              optionDisplayMaxLength = @max_display_length
               buffer = Math.floor((optionDisplayMaxLength - searchText.length)/2)
               startpos = option.search_text.search zregex
 
