@@ -32,6 +32,8 @@ class AbstractChosen
     @display_selected_options = if @options.display_selected_options? then @options.display_selected_options else true
     @display_disabled_options = if @options.display_disabled_options? then @options.display_disabled_options else true
     @include_group_label_in_selected = @options.include_group_label_in_selected || false
+    @max_shown_results = @options.max_shown_results || Number.POSITIVE_INFINITY
+    @display_truncated_options = @options.display_truncated_options || false
 
   set_default_text: ->
     if @form_field.getAttribute("data-placeholder")
@@ -173,9 +175,23 @@ class AbstractChosen
 
           if option.search_match
             if searchText.length
+              optionTextLength = option.search_text.length
+              optionDisplayMaxLength = option.max_display_length || 50
+              buffer = Math.floor((optionDisplayMaxLength - searchText.length)/2)
               startpos = option.search_text.search zregex
-              text = option.search_text.substr(0, startpos + searchText.length) + '</em>' + option.search_text.substr(startpos + searchText.length)
-              option.search_text = text.substr(0, startpos) + '<em>' + text.substr(startpos)
+
+              if !@display_truncated_options or optionTextLength <= optionDisplayMaxLength
+                text = option.search_text.substr(0, startpos + searchText.length) + '</em>' + option.search_text.substr(startpos + searchText.length)
+                option.search_text = text.substr(0, startpos) + '<em>' + text.substr(startpos)
+              else
+                startSubStrPos = `startpos - buffer > 0 ? startpos - buffer : 0`
+                startSubStrEndPos = `(startpos < buffer ? startpos : buffer)`
+                startSubStr = option.search_text.substr(startSubStrPos, startSubStrEndPos)
+                endSubStr = option.search_text.substr(startpos + searchText.length, buffer)
+                otherText =  startSubStr + '<em>' + searchText + '</em>' + endSubStr
+                dotAtStart = `(startpos - buffer > 0) ? '...' : ''`
+                dotAtEnd = `(startpos + searchText.length + buffer < optionTextLength) ? '...' : ''`
+                option.search_text = dotAtStart + otherText + dotAtEnd
 
             results_group.group_match = true if results_group?
 
