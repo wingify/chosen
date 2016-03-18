@@ -94,6 +94,7 @@ class AbstractChosen
     classes.push "result-selected" if option.selected
     classes.push "group-option" if option.group_array_index?
     classes.push option.classes if option.classes != ""
+    classes.push "ellipsis" if @display_truncated_options
 
     option_el = document.createElement("li")
     option_el.className = classes.join(" ")
